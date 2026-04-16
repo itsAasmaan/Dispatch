@@ -26,17 +26,10 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Registration Successful.',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'username' => $user->username,
-                'email' => $user->email,
-                'role' => $user->getRoleNames()->first(),
-            ],
+        return $this->created([
+            'user' => $this->formatUser($user),
             'token' => $token,
-        ], 201);
+        ], 'Registration Successful');
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -52,40 +45,16 @@ class AuthController extends Controller
 
         $user->update(['last_login_at' => now()]);
 
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'username' => $user->username,
-                'email' => $user->email,
-                'role' => $user->getRoleNames()->first(),
-            ],
+        return $this->success([
+            'user' => $this->formatUser($user),
             'token' => $token,
-        ]);
+        ], 'Login Successful');
     }
 
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'username' => $user->username,
-                'email' => $user->email,
-                'role' => $user->getRoleNames()->first(),
-                'avatar' => $user->avatar,
-                'bio' => $user->bio,
-                'current_role' => $user->current_role,
-                'current_company' => $user->current_company,
-                'years_of_experience' => $user->years_of_experience,
-                'github_url' => $user->github_url,
-                'linkedin_url' => $user->linkedin_url,
-                'portfolio_url' => $user->portfolio_url,
-                'last_login_at' => $user->last_login_at,
-            ],
+        return $this->success([
+            'user' => $this->formatUser($request->user()),
         ]);
     }
 
@@ -93,8 +62,29 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
+        return $this->success(null, 'Logged out successfully');
+    }
+
+    // -------------------------------------------------------
+    // Private helpers
+    // -------------------------------------------------------
+    private function formatUser(User $user): array
+    {
+        return [
+            'id'                  => $user->id,
+            'name'                => $user->name,
+            'username'            => $user->username,
+            'email'               => $user->email,
+            'role'                => $user->getRoleNames()->first(),
+            'avatar'              => $user->avatar,
+            'bio'                 => $user->bio,
+            'current_role'        => $user->current_role,
+            'current_company'     => $user->current_company,
+            'years_of_experience' => $user->years_of_experience,
+            'github_url'          => $user->github_url,
+            'linkedin_url'        => $user->linkedin_url,
+            'portfolio_url'       => $user->portfolio_url,
+            'last_login_at'       => $user->last_login_at,
+        ];
     }
 }
