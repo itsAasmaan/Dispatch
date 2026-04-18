@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Company\CompanyController;
+use App\Http\Controllers\Interview\InterviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', function () {
@@ -19,8 +20,13 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('companies')->group(function () {
-    Route::get('/',           [CompanyController::class, 'index']);
-    Route::get('/{company}',  [CompanyController::class, 'show']);
+    Route::get('/', [CompanyController::class, 'index']);
+    Route::get('/{company}', [CompanyController::class, 'show']);
+});
+
+Route::prefix('interviews')->group(function () {
+    Route::get('/', [InterviewController::class, 'index']);
+    Route::get('/{interview}', [InterviewController::class, 'show']);
 });
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
@@ -42,12 +48,21 @@ Route::middleware(['auth:sanctum', 'role:company'])->prefix('company')->group(fu
 });
 
 Route::middleware('auth:sanctum')->prefix('companies')->group(function () {
-    Route::post('/{company}/follow',   [CompanyController::class, 'follow']);
+    Route::post('/{company}/follow', [CompanyController::class, 'follow']);
     Route::delete('/{company}/follow', [CompanyController::class, 'unfollow']);
 });
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('companies')->group(function () {
-    Route::post('/',           [CompanyController::class, 'store']);
-    Route::put('/{company}',   [CompanyController::class, 'update']);
-    Route::delete('/{company}',[CompanyController::class, 'destroy']);
+    Route::post('/', [CompanyController::class, 'store']);
+    Route::put('/{company}', [CompanyController::class, 'update']);
+    Route::delete('/{company}', [CompanyController::class, 'destroy']);
+});
+
+Route::middleware(['auth:sanctum', 'role:candidate'])->prefix('interviews')->group(function () {
+    Route::post('/', [InterviewController::class, 'store']);
+    Route::put('/{interview}', [InterviewController::class, 'update']);
+    Route::delete('/{interview}', [InterviewController::class, 'destroy']);
+    Route::post('/{interview}/publish', [InterviewController::class, 'publish']);
+    Route::post('/{interview}/upvote', [InterviewController::class, 'upvote']);
+    Route::post('/{interview}/bookmark', [InterviewController::class, 'bookmark']);
 });
