@@ -6,79 +6,101 @@ use App\Http\Controllers\Interview\InterviewController;
 use App\Http\Controllers\Question\QuestionController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/health', function () {
-    return response()->json(['status' => 'Dispatch API is running']);
-});
+/*
+|--------------------------------------------------------------------------
+| System Health
+|--------------------------------------------------------------------------
+*/
+Route::get('/health', fn () => response()->json(['status' => 'Dispatch API is running']));
 
-Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+/*
+|--------------------------------------------------------------------------
+| Authentication
+|--------------------------------------------------------------------------
+*/
+Route::prefix('auth')->controller(AuthController::class)->group(function () {
+    Route::post('/register', 'register')->middleware('throttle:6,1');
+    Route::post('/login', 'login')->middleware('throttle:6,1');
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/me', [AuthController::class, 'me']);
-        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', 'me');
+        Route::post('/logout', 'logout');
     });
 });
 
-Route::prefix('companies')->group(function () {
-    Route::get('/', [CompanyController::class, 'index']);
-    Route::get('/{company}', [CompanyController::class, 'show']);
-});
+/*
+|--------------------------------------------------------------------------
+| Companies
+|--------------------------------------------------------------------------
+*/
+Route::prefix('companies')->controller(CompanyController::class)->group(function () {
+    // Public routes
+    Route::get('/', 'index');
+    Route::get('/{company}', 'show');
 
-Route::prefix('interviews')->group(function () {
-    Route::get('/', [InterviewController::class, 'index']);
-    Route::get('/{interview}', [InterviewController::class, 'show']);
-});
+    // Authenticated routes
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/{company}/follow', 'follow');
+        Route::delete('/{company}/follow', 'unfollow');
 
-Route::prefix('questions')->group(function () {
-    Route::get('/',            [QuestionController::class, 'index']);
-    Route::get('/{question}',  [QuestionController::class, 'show']);
-});
-
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return response()->json(['message' => 'Welcome Admin']);
+        // Admin management
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/', 'store');
+            Route::put('/{company}', 'update');
+            Route::delete('/{company}', 'destroy');
+        });
     });
 });
 
-Route::middleware(['auth:sanctum', 'role:candidate'])->prefix('candidate')->group(function () {
-    Route::get('/dashboard', function () {
-        return response()->json(['message' => 'Welcome candidate']);
+/*
+|--------------------------------------------------------------------------
+| Interviews
+|--------------------------------------------------------------------------
+*/
+Route::prefix('interviews')->controller(InterviewController::class)->group(function () {
+    // Public routes
+    Route::get('/', 'index');
+    Route::get('/{interview}', 'show');
+
+    // Candidate management
+    Route::middleware(['auth:sanctum', 'role:candidate'])->group(function () {
+        Route::post('/', 'store');
+        Route::put('/{interview}', 'update');
+        Route::delete('/{interview}', 'destroy');
+        Route::post('/{interview}/publish', 'publish');
+        Route::post('/{interview}/upvote', 'upvote');
+        Route::post('/{interview}/bookmark', 'bookmark');
     });
 });
 
-Route::middleware(['auth:sanctum', 'role:company'])->prefix('company')->group(function () {
-    Route::get('/dashboard', function () {
-        return response()->json(['message' => 'Welcome company']);
+/*
+|--------------------------------------------------------------------------
+| Questions
+|--------------------------------------------------------------------------
+*/
+Route::prefix('questions')->controller(QuestionController::class)->group(function () {
+    // Public routes
+    Route::get('/', 'index');
+    Route::get('/{question}', 'show');
+
+    // Authenticated interactions
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/', 'store');
+        Route::post('/{question}/upvote', 'upvote');
+        Route::post('/{question}/bookmark', 'bookmark');
+
+        // Admin approval
+        Route::middleware('role:admin')->put('/{question}/approve', 'approve');
     });
 });
 
-Route::middleware('auth:sanctum')->prefix('companies')->group(function () {
-    Route::post('/{company}/follow', [CompanyController::class, 'follow']);
-    Route::delete('/{company}/follow', [CompanyController::class, 'unfollow']);
-});
-
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('companies')->group(function () {
-    Route::post('/', [CompanyController::class, 'store']);
-    Route::put('/{company}', [CompanyController::class, 'update']);
-    Route::delete('/{company}', [CompanyController::class, 'destroy']);
-});
-
-Route::middleware(['auth:sanctum', 'role:candidate'])->prefix('interviews')->group(function () {
-    Route::post('/', [InterviewController::class, 'store']);
-    Route::put('/{interview}', [InterviewController::class, 'update']);
-    Route::delete('/{interview}', [InterviewController::class, 'destroy']);
-    Route::post('/{interview}/publish', [InterviewController::class, 'publish']);
-    Route::post('/{interview}/upvote', [InterviewController::class, 'upvote']);
-    Route::post('/{interview}/bookmark', [InterviewController::class, 'bookmark']);
-});
-
-Route::middleware('auth:sanctum')->prefix('questions')->group(function () {
-    Route::post('/',                      [QuestionController::class, 'store']);
-    Route::post('/{question}/upvote',     [QuestionController::class, 'upvote']);
-    Route::post('/{question}/bookmark',   [QuestionController::class, 'bookmark']);
-});
-
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin/questions')->group(function () {
-    Route::put('/{question}/approve', [QuestionController::class, 'approve']);
+/*
+|--------------------------------------------------------------------------
+| Dashboards
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/dashboard', fn () => response()->json(['message' => 'Welcome Admin']))->middleware('role:admin');
+    Route::get('/candidate/dashboard', fn () => response()->json(['message' => 'Welcome Candidate']))->middleware('role:candidate');
+    Route::get('/company/dashboard', fn () => response()->json(['message' => 'Welcome Company']))->middleware('role:company');
 });
