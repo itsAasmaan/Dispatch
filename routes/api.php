@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Interview\InterviewController;
+use App\Http\Controllers\Question\QuestionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', function () {
@@ -27,6 +28,11 @@ Route::prefix('companies')->group(function () {
 Route::prefix('interviews')->group(function () {
     Route::get('/', [InterviewController::class, 'index']);
     Route::get('/{interview}', [InterviewController::class, 'show']);
+});
+
+Route::prefix('questions')->group(function () {
+    Route::get('/',            [QuestionController::class, 'index']);
+    Route::get('/{question}',  [QuestionController::class, 'show']);
 });
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
@@ -65,4 +71,14 @@ Route::middleware(['auth:sanctum', 'role:candidate'])->prefix('interviews')->gro
     Route::post('/{interview}/publish', [InterviewController::class, 'publish']);
     Route::post('/{interview}/upvote', [InterviewController::class, 'upvote']);
     Route::post('/{interview}/bookmark', [InterviewController::class, 'bookmark']);
+});
+
+Route::middleware('auth:sanctum')->prefix('questions')->group(function () {
+    Route::post('/',                      [QuestionController::class, 'store']);
+    Route::post('/{question}/upvote',     [QuestionController::class, 'upvote']);
+    Route::post('/{question}/bookmark',   [QuestionController::class, 'bookmark']);
+});
+
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin/questions')->group(function () {
+    Route::put('/{question}/approve', [QuestionController::class, 'approve']);
 });
