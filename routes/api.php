@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Interview\InterviewController;
 use App\Http\Controllers\Question\QuestionController;
+use App\Http\Controllers\Quiz\QuizController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -91,6 +92,26 @@ Route::prefix('questions')->controller(QuestionController::class)->group(functio
 
         // Admin approval
         Route::middleware('role:admin')->put('/{question}/approve', 'approve');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| quizzes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('quizzes')->group(function () {
+    Route::get('/',                 [QuizController::class, 'index']);
+    Route::get('/{quiz}',           [QuizController::class, 'show']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/generate',    [QuizController::class, 'generate']);
+        Route::get('/my-attempts',  [QuizController::class, 'myAttempts']);
+        Route::post('/{quiz}/start', [QuizController::class, 'start']);
+        Route::prefix('attempts')->group(function () {
+            Route::post('/{attempt}/answer',    [QuizController::class, 'submitAnswer']);
+            Route::post('/{attempt}/complete',  [QuizController::class, 'complete']);
+            Route::get('/{attempt}/result',     [QuizController::class, 'result']);
+        });
     });
 });
 
