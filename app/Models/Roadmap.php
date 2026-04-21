@@ -28,6 +28,11 @@ class Roadmap extends Model
         'is_active' => 'boolean',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected static function boot(): void
     {
         parent::boot();

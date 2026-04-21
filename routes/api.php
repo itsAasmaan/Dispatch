@@ -5,6 +5,7 @@ use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Interview\InterviewController;
 use App\Http\Controllers\Question\QuestionController;
 use App\Http\Controllers\Quiz\QuizController;
+use App\Http\Controllers\Roadmap\RoadmapController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 | System Health
 |--------------------------------------------------------------------------
 */
-Route::get('/health', fn () => response()->json(['status' => 'Dispatch API is running']));
+Route::get('/health', fn() => response()->json(['status' => 'Dispatch API is running']));
 
 /*
 |--------------------------------------------------------------------------
@@ -101,17 +102,35 @@ Route::prefix('questions')->controller(QuestionController::class)->group(functio
 |--------------------------------------------------------------------------
 */
 Route::prefix('quizzes')->group(function () {
-    Route::get('/',                 [QuizController::class, 'index']);
-    Route::get('/{quiz}',           [QuizController::class, 'show']);
+    Route::get('/', [QuizController::class, 'index']);
+    Route::get('/{quiz}', [QuizController::class, 'show']);
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/generate',    [QuizController::class, 'generate']);
-        Route::get('/my-attempts',  [QuizController::class, 'myAttempts']);
+        Route::post('/generate', [QuizController::class, 'generate']);
+        Route::get('/my-attempts', [QuizController::class, 'myAttempts']);
         Route::post('/{quiz}/start', [QuizController::class, 'start']);
         Route::prefix('attempts')->group(function () {
-            Route::post('/{attempt}/answer',    [QuizController::class, 'submitAnswer']);
-            Route::post('/{attempt}/complete',  [QuizController::class, 'complete']);
-            Route::get('/{attempt}/result',     [QuizController::class, 'result']);
+            Route::post('/{attempt}/answer', [QuizController::class, 'submitAnswer']);
+            Route::post('/{attempt}/complete', [QuizController::class, 'complete']);
+            Route::get('/{attempt}/result', [QuizController::class, 'result']);
         });
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Roadmaps
+|--------------------------------------------------------------------------
+*/
+Route::get('/topics', [RoadmapController::class, 'topics']);
+Route::prefix('roadmaps')->group(function () {
+    Route::get('/', [RoadmapController::class, 'index']);
+    Route::get('/{roadmap}', [RoadmapController::class, 'show']);
+
+    Route::middleware(['auth:sanctum', 'role:candidate'])->group(function () {
+        Route::post('/{roadmap}/enroll', [RoadmapController::class, 'enroll']);
+        Route::delete('/{roadmap}/enroll', [RoadmapController::class, 'unenroll']);
+        Route::put('/{roadmap}/topics/{topic}/progress', [RoadmapController::class, 'updateTopicProgress']);
+        Route::get('/my-progress', [RoadmapController::class, 'myProgress']);
     });
 });
 
@@ -121,7 +140,7 @@ Route::prefix('quizzes')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/admin/dashboard', fn () => response()->json(['message' => 'Welcome Admin']))->middleware('role:admin');
-    Route::get('/candidate/dashboard', fn () => response()->json(['message' => 'Welcome Candidate']))->middleware('role:candidate');
-    Route::get('/company/dashboard', fn () => response()->json(['message' => 'Welcome Company']))->middleware('role:company');
+    Route::get('/admin/dashboard', fn() => response()->json(['message' => 'Welcome Admin']))->middleware('role:admin');
+    Route::get('/candidate/dashboard', fn() => response()->json(['message' => 'Welcome Candidate']))->middleware('role:candidate');
+    Route::get('/company/dashboard', fn() => response()->json(['message' => 'Welcome Company']))->middleware('role:company');
 });
