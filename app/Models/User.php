@@ -63,4 +63,21 @@ class User extends Authenticatable
     {
         return $this->hasMany(Company::class, 'added_by');
     }
+
+    public function roadmapEnrollments(): HasMany
+    {
+        return $this->hasMany(RoadmapEnrollment::class);
+    }
+
+    public function topicProgress(): HasMany
+    {
+        return $this->hasMany(CandidateTopicProgress::class);
+    }
+
+    public function enrolledRoadmaps(): BelongsToMany
+    {
+        return $this->belongsToMany(Roadmap::class, 'roadmap_enrollments')
+            ->withPivot('status', 'completion_percentage', 'enrolled_at')
+            ->withTimestamps();
+    }
 }
