@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Comment\CommentController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Interview\InterviewController;
 use App\Http\Controllers\PreparationPlan\PreparationPlanController;
@@ -149,6 +150,24 @@ Route::prefix('preparation-plans')->group(function () {
         Route::get('/{plan}/today', [PreparationPlanController::class, 'todayTasks']);
         Route::post('/tasks/{task}/complete', [PreparationPlanController::class, 'completeTask']);
         Route::post('/tasks/{task}/skip', [PreparationPlanController::class, 'skipTask']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Dashboards
+|--------------------------------------------------------------------------
+*/
+Route::controller(CommentController::class)->group(function () {
+    Route::get('/interviews/{interview}/comments', 'interviewComments')->name('comments.interview.index');
+    Route::get('/questions/{question}/comments', 'questionComments')->name('comments.question.index');
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/interviews/{interview}/comments', 'storeForInterview')->name('comments.interview.store');
+        Route::post('/questions/{question}/comments', 'storeForQuestion')->name('comments.question.store');
+        
+        Route::delete('/comments/{comment}', 'destroy')->name('comments.destroy');
+        Route::post('/comments/{comment}/upvote', 'upvote')->name('comments.upvote');
+        Route::post('/comments/{comment}/flag', 'flag')->name('comments.flag');
     });
 });
 
