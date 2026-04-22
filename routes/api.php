@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Interview\InterviewController;
+use App\Http\Controllers\PreparationPlan\PreparationPlanController;
 use App\Http\Controllers\Question\QuestionController;
 use App\Http\Controllers\Quiz\QuizController;
 use App\Http\Controllers\Roadmap\RoadmapController;
@@ -131,6 +132,23 @@ Route::prefix('roadmaps')->group(function () {
         Route::delete('/{roadmap}/enroll', [RoadmapController::class, 'unenroll']);
         Route::put('/{roadmap}/topics/{topic}/progress', [RoadmapController::class, 'updateTopicProgress']);
         Route::get('/my-progress', [RoadmapController::class, 'myProgress']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Roadmaps
+|--------------------------------------------------------------------------
+*/
+Route::prefix('preparation-plans')->group(function () {
+    Route::middleware(['auth:sanctum', 'role:candidate'])->group(function () {
+        Route::get('/', [PreparationPlanController::class, 'index']);
+        Route::post('/', [PreparationPlanController::class, 'store']);
+        Route::get('/{plan}', [PreparationPlanController::class, 'show']);
+        Route::delete('/{plan}', [PreparationPlanController::class, 'destroy']);
+        Route::get('/{plan}/today', [PreparationPlanController::class, 'todayTasks']);
+        Route::post('/tasks/{task}/complete', [PreparationPlanController::class, 'completeTask']);
+        Route::post('/tasks/{task}/skip', [PreparationPlanController::class, 'skipTask']);
     });
 });
 
