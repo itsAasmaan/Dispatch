@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Comment\CommentController;
 use App\Http\Controllers\Company\CompanyController;
@@ -203,6 +204,29 @@ Route::prefix('salary-insights')->group(function () {
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| Admin API
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::get('/stats', [AdminController::class, 'stats']);
+    Route::prefix('users')->group(function () {
+        Route::get('/', [AdminController::class, 'users']);
+        Route::post('/{user}/toggle-active', [AdminController::class, 'toggleUserActive']);
+    });
+    Route::prefix('comments')->group(function () {
+        Route::get('/flagged', [AdminController::class, 'flaggedComments']);
+        Route::post('/{comment}/dismiss-flag', [AdminController::class, 'dismissFlag']);
+        Route::delete('/{comment}', [AdminController::class, 'deleteComment']);
+    });
+    Route::prefix('companies')->group(function () {
+        Route::post('/{company}/verify', [AdminController::class, 'verifyCompany']);
+    });
+    Route::prefix('questions')->group(function () {
+        Route::get('/pending', [AdminController::class, 'pendingQuestions']);
+    });
+});
 /*
 |--------------------------------------------------------------------------
 | Dashboards
