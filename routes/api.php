@@ -7,6 +7,7 @@ use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Interview\InterviewController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PreparationPlan\PreparationPlanController;
+use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Question\QuestionController;
 use App\Http\Controllers\Quiz\QuizController;
 use App\Http\Controllers\Roadmap\RoadmapController;
@@ -227,6 +228,21 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin'])->group(functi
         Route::get('/pending', [AdminController::class, 'pendingQuestions']);
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Profile
+|--------------------------------------------------------------------------
+*/
+Route::prefix('profile')->group(function () {
+    Route::get('/{username}', [ProfileController::class]);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::put('/', [ProfileController::class, 'update']);
+        Route::get('/my-interviews', [ProfileController::class, 'myInterviews']);
+        Route::get('/my-bookmarks', [ProfileController::class, 'myBookmarks']);
+    });
+});
+
 /*
 |--------------------------------------------------------------------------
 | Dashboards

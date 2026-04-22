@@ -80,4 +80,9 @@ class User extends Authenticatable
             ->withPivot('status', 'completion_percentage', 'enrolled_at')
             ->withTimestamps();
     }
+
+    public function bookmarkedInterviews(): BelongsToMany
+    {
+        return $this->belongsToMany(Interview::class, 'interview_bookmarks')->withTimestamps();
+    }
 }
