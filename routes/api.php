@@ -9,6 +9,7 @@ use App\Http\Controllers\PreparationPlan\PreparationPlanController;
 use App\Http\Controllers\Question\QuestionController;
 use App\Http\Controllers\Quiz\QuizController;
 use App\Http\Controllers\Roadmap\RoadmapController;
+use App\Http\Controllers\SalaryInsight\SalaryInsightController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -186,6 +187,19 @@ Route::prefix('notifications')->group(function () {
         Route::prefix('{id}')->group(function () {
             Route::post('/read', [NotificationController::class, 'markAsRead']);
         });
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Salary Insights
+|--------------------------------------------------------------------------
+*/
+Route::prefix('salary-insights')->group(function () {
+    Route::get('/', [SalaryInsightController::class, 'index']);
+    Route::get('/stats', [SalaryInsightController::class, 'stats']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/', [SalaryInsightController::class, 'store']);
     });
 });
 
