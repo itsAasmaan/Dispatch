@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Comment;
+use App\Models\Interview;
+use App\Observers\CommentObserver;
+use App\Observers\InterviewObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Interview::observe(InterviewObserver::class);
+        Comment::observe(CommentObserver::class);
     }
 }

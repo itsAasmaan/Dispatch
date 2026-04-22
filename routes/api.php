@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Comment\CommentController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Interview\InterviewController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PreparationPlan\PreparationPlanController;
 use App\Http\Controllers\Question\QuestionController;
 use App\Http\Controllers\Quiz\QuizController;
@@ -164,10 +165,27 @@ Route::controller(CommentController::class)->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/interviews/{interview}/comments', 'storeForInterview')->name('comments.interview.store');
         Route::post('/questions/{question}/comments', 'storeForQuestion')->name('comments.question.store');
-        
+
         Route::delete('/comments/{comment}', 'destroy')->name('comments.destroy');
         Route::post('/comments/{comment}/upvote', 'upvote')->name('comments.upvote');
         Route::post('/comments/{comment}/flag', 'flag')->name('comments.flag');
+    });
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Notifications
+|--------------------------------------------------------------------------
+*/
+Route::prefix('notifications')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead']);
+        Route::prefix('{id}')->group(function () {
+            Route::post('/read', [NotificationController::class, 'markAsRead']);
+        });
     });
 });
 
