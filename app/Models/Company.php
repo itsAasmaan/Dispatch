@@ -45,9 +45,11 @@ class Company extends Model
         'follower_count' => 'integer',
     ];
 
-    // -------------------------------------------------------
-    // Boot — auto generate slug
-    // -------------------------------------------------------
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+    
     protected static function boot(): void
     {
         parent::boot();
@@ -57,9 +59,6 @@ class Company extends Model
         });
     }
 
-    // -------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------
     public function addedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'added_by');
@@ -69,10 +68,6 @@ class Company extends Model
     {
         return $this->belongsToMany(User::class, 'company_followers')->withTimestamps();
     }
-
-    // -------------------------------------------------------
-    // Helper methods
-    // -------------------------------------------------------
 
     public function isFollowedBy(User $user): bool
     {
@@ -94,10 +89,6 @@ class Company extends Model
         $this->decrement('follower_count');
     }
 
-    // -------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------
-
     public function scopeVerified($query)
     {
         return $query->where('is_verified', true);
@@ -112,10 +103,7 @@ class Company extends Model
     {
         return $query->where('industry', $industry);
     }
-
-    // -------------------------------------------------------
-    // Static helpers
-    // -------------------------------------------------------
+    
     private static function generateUniqueSlug(string $name): string
     {
         $slug = Str::slug($name);
