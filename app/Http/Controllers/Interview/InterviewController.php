@@ -21,7 +21,7 @@ class InterviewController extends Controller
             ->when($request->difficulty, fn($q) => $q->byDifficulty($request->difficulty))
             ->when($request->role_title, fn($q) => $q->where('role_title', 'like', "%{$request->role_title}%"))
             ->orderBy('published_at', 'desc')
-            ->paginate(10);
+            ->paginate(5);
 
         return $this->success($interviews);
     }
