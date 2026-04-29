@@ -23,6 +23,9 @@ return new class extends Migration
                 'managerial',
                 'assignment',
                 'cultural_fit',
+                'behavioural',
+                'frontend',
+                'backend',
                 'other',
             ]);
 

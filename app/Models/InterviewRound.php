@@ -10,6 +10,8 @@ class InterviewRound extends Model
 {
     use HasFactory;
 
+    protected $table = 'interview_round';
+
     protected $fillable = [
         'interview_id',
         'round_number',
